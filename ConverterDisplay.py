@@ -10,7 +10,7 @@ while True:
     if uart1.any():
         ser_bytes = uart1.readline();
         # Debug output
-        print('DEBUG: '+ser_bytes.decode("utf8"))
+        # print('DEBUG: '+ser_bytes.decode("utf8"))
         # Read UpConverter Values
         if ser_bytes.decode("utf8")[0:3] == 'UPC':
             # Read Temperature (00)
@@ -20,23 +20,32 @@ while True:
                 uart0.write(txData)
                 uart0.write(end_cmd)
             # Read Voltage (01)
-            if ser_bytes.decode("utf8")[7:9] == '01':
+            elif ser_bytes.decode("utf8")[7:9] == '01':
                 #print('Voltage: '+ser_bytes.decode("utf8")[10:11]+'.'+ser_bytes.decode("utf8")[11:14]+'V')
                 txData = b't4.txt="'+ser_bytes.decode("utf8")[10:11]+'.'+ser_bytes.decode("utf8")[11:14]+'V"'
                 uart0.write(txData)
                 uart0.write(end_cmd)
             # Read forward power (02)
-            if ser_bytes.decode("utf8")[7:9] == '02':
+            elif ser_bytes.decode("utf8")[7:9] == '02':
                 print('FWD power: '+ser_bytes.decode("utf8")[10:12]+' / '+ser_bytes.decode("utf8")[13:15]+'dBm')
             # Read PTT state (06)
-            if ser_bytes.decode("utf8")[7:9] == '06':
+            elif ser_bytes.decode("utf8")[7:9] == '06':
                 if ser_bytes.decode("utf8")[10:11] == '1':
-                    print('PTT state: ON')
+                    #print('PTT state: ON')
+                    txData = b'p1.pic=2'
+                    uart0.write(txData)
+                    uart0.write(end_cmd)
                 else:
-                    print('PTT state: OFF')
+                    #print('PTT state: OFF')
+                    txData = b'p1.pic=1'
+                    uart0.write(txData)
+                    uart0.write(end_cmd)
+            # Print unknown sentences
+            else:
+                print(ser_bytes.decode("utf8"))
         
         # Read DownConverter Values
-        if ser_bytes.decode("utf8")[0:3] == 'OLD':
+        elif ser_bytes.decode("utf8")[0:3] == 'OLD':
             # Read GPS time
             if ser_bytes.decode("utf8")[4:9] == '00 01':
                 #print ('GPS Time: '+ser_bytes.decode("utf8")[10:18])
@@ -44,29 +53,35 @@ while True:
                 uart0.write(txData)
                 uart0.write(end_cmd)
             # Read GPS SAT count
-            if ser_bytes.decode("utf8")[4:9] == '56 05':
+            elif ser_bytes.decode("utf8")[4:9] == '56 05':
                 #print ('SATs: '+ser_bytes.decode("utf8")[10:11])
                 txData = b't7.txt="SATs: '+ser_bytes.decode("utf8")[10:11]+'"'
                 uart0.write(txData)
                 uart0.write(end_cmd)
             # Read Maidenhead grid
-            if ser_bytes.decode("utf8")[4:9] == '72 01':
+            elif ser_bytes.decode("utf8")[4:9] == '72 01':
                 #print ('Grid: '+ser_bytes.decode("utf8")[10:16])
                 txData = b't8.txt="'+ser_bytes.decode("utf8")[10:16]+'"'
                 uart0.write(txData)
                 uart0.write(end_cmd)
             # Read Latitude
-            if ser_bytes.decode("utf8")[4:9] == '48 06':
+            elif ser_bytes.decode("utf8")[4:9] == '48 06':
                 #print ('Lat: '+ser_bytes.decode("utf8")[10:20])
                 txData = b't9.txt="'+ser_bytes.decode("utf8")[10:12]+'° '+ser_bytes.decode("utf8")[13:18]+' '+ser_bytes.decode("utf8")[18:20]+'"'
                 uart0.write(txData)
                 uart0.write(end_cmd)
             # Read Longitude
-            if ser_bytes.decode("utf8")[4:9] == '40 07':
+            elif ser_bytes.decode("utf8")[4:9] == '40 07':
                 #print ('Lon: '+ser_bytes.decode("utf8")[10:20])
                 txData = b't10.txt="'+ser_bytes.decode("utf8")[10:13]+'° '+ser_bytes.decode("utf8")[14:19]+' '+ser_bytes.decode("utf8")[19:21]+'"'
                 uart0.write(txData)
                 uart0.write(end_cmd)
+            # Print unknown sentences
+            else:
+                print(ser_bytes.decode("utf8"))
+        else:
+            print('Unknown sentence received')
+            print(ser_bytes.decode("utf8"))
             
             #txData = b't0.txt="TEST: '+ser_bytes.decode("utf8")+'"'
             #uart0.write(txData)

@@ -38,10 +38,14 @@ GND       ---       8
 
 ![Wiring of Components](Wiring.jpg)
 
+## Raspberry Pi Pico Code
+
+The code for the Raspberry Pi Pico has been written in MicroPython. The source is provided as .py file that can be uploaded to the Pi using Thonny for example. You have to install the MicroPython environment on the Pi beforehand. See the official [Raspberry Pi Pico documentation](https://www.raspberrypi.org/documentation/rp2040/getting-started/#getting-started-with-micropython) on how this can be done. In Thonny you can just open the ConverterDisplay.py code and upload it to the Raspberry Pi Pico storing it as main.py on the device. This way the code is started every time the Pi is powered.
+
 ## Nextion Display
 
 The code for the Nextion display is provided as source as well as a compiled binary (ConverterDisplay.tft). The .tft file can be uploaded to the display either via the Nextion Editor of through copying the file to a microSD card and flashing the display from the card.
 
 ## Known Issues
 
-The v1.0 of the up converter firmware sends the configuration parameters on the serial line only once and directly after start. At this point of time the Raspberry Pi Pico is not started yet. Thus I provided a patch and created a pull request to the repository. In order to use this code you have to be able to compile and upload the patched code yourself until this is included in the official code.
+The v1.0 of the up converter firmware sends the configuration parameters on the serial line only once and directly after start. At this point of time the Raspberry Pi Pico is not started yet. Thus I provided a patch and created a [pull request](https://github.com/amsat-dl/qo100_upconverter/pull/1) to the repository. In order to use this code you have to be able to compile and upload the patched code yourself until this is included in the official code.

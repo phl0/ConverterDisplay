@@ -1,3 +1,6 @@
+# ConverterDisplay v0.2
+# Florian Wolters, DF2ET
+
 from machine import UART, Pin
 import time
 import ure
@@ -18,52 +21,57 @@ rx_if_1=''
 rx_if_2=''
 lnb_ref_1=''
 lnb_ref_2=''
+string = ''
 config_written=0
 
 while True:
     if uart1.any():
         act_led.value(1)
         ser_bytes = uart1.readline();
+        string = ser_bytes.decode("utf8").strip()
+        x = string.split(" ")
         # Debug output
         if debug==1:
             txData = b't01.txt+="\r'+ser_bytes.decode("utf8")+'"'
             uart0.write(txData)
             uart0.write(end_cmd)
-            print('DEBUG: '+ser_bytes.decode("utf8"))
-        # Read UpConverter Values
-        if ser_bytes.decode("utf8")[0:3] == 'UPC':
+            print(string)
+            print('       012345678901234567890')
+            print('                 1         2')
+        # Read UpConverter Values (first column is always 00 here so ignore x[1])
+        if x[0] == 'UPC':
             # Read Temperature (00)
-            if ser_bytes.decode("utf8")[7:9] == '00':
-                #print('Temp: '+ser_bytes.decode("utf8")[10:12]+'°C')
-                txData = b't3.txt="'+ser_bytes.decode("utf8")[10:12]+'°C "'
+            if x[2] == '00':
+                #print('Temp: '+x[3]+' \u00b0C')
+                txData = b't3.txt="'+x[3]+'\u00b0C "'
                 uart0.write(txData)
                 uart0.write(end_cmd)
             # Read Voltage (01)
-            #elif ser_bytes.decode("utf8")[7:9] == '01':
-                #print('Voltage: '+ser_bytes.decode("utf8")[10:11]+'.'+ser_bytes.decode("utf8")[11:14]+'V')
-                #txData = b't4.txt="'+ser_bytes.decode("utf8")[10:11]+'.'+ser_bytes.decode("utf8")[11:14]+'V"'
-                #uart0.write(txData)
-                #uart0.write(end_cmd)
-            # Read forward power (02)
-            elif ser_bytes.decode("utf8")[7:9] == '02':
-                #print('FWD power: '+ser_bytes.decode("utf8")[10:12]+' / '+ser_bytes.decode("utf8")[13:15]+'dBm')
-                txData = b't20.txt="'+ser_bytes.decode("utf8")[13:15]+'dBm "'
+            elif x[2] == '01':
+                voltage = int(x[3]) / 1000
+                #print('Voltage: %3.2f V' % voltage)
+                txData = b't4.txt="%3.2f V "' % voltage
                 uart0.write(txData)
                 uart0.write(end_cmd)
-            # Read reflected power (03)
-            elif ser_bytes.decode("utf8")[7:9] == '03':
-                #print('REF power: '+ser_bytes.decode("utf8")[10:12]+' / '+ser_bytes.decode("utf8")[13:15]+'dBm')
-                txData = b't21.txt="'+ser_bytes.decode("utf8")[13:15]+'dBm "'
+            # Read forward power (02)
+            elif x[2] == '02':
+                dbm = int(x[4])
+                watts = pow(10,(dbm/10))/1000
+                #print('FWD power: %d dBm / %3.2f W' % (dbm, watts))
+                txData = b't20.txt="%d dBm "' % dbm
+                uart0.write(txData)
+                uart0.write(end_cmd)
+                txData = b't21.txt="%3.2f W "' % watts
                 uart0.write(txData)
                 uart0.write(end_cmd)
             # Read LO frequency (05)
-            elif ser_bytes.decode("utf8")[7:9] == '05':
+            elif x[2] == '05':
                 if tx_lo == '':
-                    print('LO: '+ser_bytes.decode("utf8")[10:14]+' MHz')
-                    tx_lo = ser_bytes.decode("utf8")[10:14]
+                    print('LO: '+x[3]+' kHz')
+                    tx_lo = int(x[3])/1000
             # Read PTT state (06)
-            elif ser_bytes.decode("utf8")[7:9] == '06':
-                if ser_bytes.decode("utf8")[10:11] == '1':
+            elif x[2] == '06':
+                if x[3] == '1':
                     #print('PTT state: ON')
                     ptt_led.value(1)
                     txData = b'page 2'
@@ -78,20 +86,20 @@ while True:
                     uart0.write(txData)
                     uart0.write(end_cmd)
             # Read version string (07)
-            elif ser_bytes.decode("utf8")[7:9] == '07':
-                print('Ver: '+ser_bytes.decode("utf8")[10:-5])
+            elif x[2] == '07':
+                print('Ver: '+x[3])
             # Read IF frequency (10)
-            elif ser_bytes.decode("utf8")[7:9] == '10':
+            elif x[2] == '10':
                 if tx_if == '':
-                    print('IF: '+ser_bytes.decode("utf8")[10:-5]+' MHz')
-                    tx_if = ser_bytes.decode("utf8")[10:-5]
+                    print('IF: '+x[3]+' kHz')
+                    tx_if = int(x[3])/1000
             # Print unknown sentences
             else:
                 if debug==1:
                     print(ser_bytes.decode("utf8"))
         
         # Read DownConverter Values
-        elif ser_bytes.decode("utf8")[0:3] == 'OLD':
+        elif x[0] == 'OLD':
             # Read GPS time
             if ser_bytes.decode("utf8")[4:9] == '00 01':
                 #print ('GPS Time: '+ser_bytes.decode("utf8")[10:18])
@@ -113,13 +121,13 @@ while True:
             # Read Latitude
             elif ser_bytes.decode("utf8")[4:9] == '48 06':
                 #print ('Lat: '+ser_bytes.decode("utf8")[10:20])
-                txData = b't10.txt="'+ser_bytes.decode("utf8")[10:12]+'° '+ser_bytes.decode("utf8")[13:18]+' '+ser_bytes.decode("utf8")[18:20]+'"'
+                txData = b't10.txt="'+ser_bytes.decode("utf8")[10:12]+'\u00b0  '+ser_bytes.decode("utf8")[13:18]+' '+ser_bytes.decode("utf8")[18:20]+'"'
                 uart0.write(txData)
                 uart0.write(end_cmd)
             # Read Longitude
             elif ser_bytes.decode("utf8")[4:9] == '40 07':
                 #print ('Lon: '+ser_bytes.decode("utf8")[10:20])
-                txData = b't11.txt="'+ser_bytes.decode("utf8")[10:13]+'° '+ser_bytes.decode("utf8")[14:19]+' '+ser_bytes.decode("utf8")[19:21]+'"'
+                txData = b't11.txt="'+ser_bytes.decode("utf8")[10:13]+'\u00b0 '+ser_bytes.decode("utf8")[14:19]+' '+ser_bytes.decode("utf8")[19:21]+'"'
                 uart0.write(txData)
                 uart0.write(end_cmd)
             # Read Downlink IF (40 03 + 64 03)

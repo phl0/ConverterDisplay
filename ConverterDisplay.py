@@ -93,6 +93,10 @@ while True:
                 if tx_if == '':
                     print('IF: '+x[3]+' kHz')
                     tx_if = int(x[3])/1000
+            # Read UpConverter ADF4351 state
+            elif x[2] == '09':
+                #print ('UpConv ADF4351 state: '+x[3])
+                up4351 = x[3];
             # Print unknown sentences
             else:
                 if debug==1:
@@ -142,6 +146,14 @@ while True:
             elif x[1] == '64' and x[2] == '04':
                 lnb_ref_2 = x[3][1:]
                 print ('LNB Ref: '+lnb_ref_1+'.'+lnb_ref_2+' MHz')
+            # Read source for reference frequency (80 00)
+            elif x[1] == '80' and x[2] == '00':
+                #print ('Ref source: '+x[3])
+                ref_source = x[3];
+            # Read DownConverter ADF4351 state
+            elif x[1] == '88' and x[2] == '06':
+                #print ('DownConv ADF4351 state: '+x[3])
+                down4351 = x[3];
             # Print unknown sentences
             else:
                 if debug==1:

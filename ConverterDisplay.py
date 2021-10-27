@@ -32,7 +32,7 @@ while True:
         x = string.split(" ")
         # Debug output
         if debug==1:
-            txData = b't01.txt+="\r'+ser_bytes.decode("utf8")+'"'
+            txData = b't01.txt+="\r'+string+'"'
             uart0.write(txData)
             uart0.write(end_cmd)
             print(string)
@@ -101,46 +101,46 @@ while True:
         # Read DownConverter Values
         elif x[0] == 'OLD':
             # Read GPS time
-            if ser_bytes.decode("utf8")[4:9] == '00 01':
-                #print ('GPS Time: '+ser_bytes.decode("utf8")[10:18])
-                txData = b't1.txt="'+ser_bytes.decode("utf8")[10:18]+'"'
+            if x[1] == '00' and x[2] =='01':
+                #print ('GPS Time: '+x[3])
+                txData = b't1.txt="'+x[3]+'"'
                 uart0.write(txData)
                 uart0.write(end_cmd)
             # Read GPS SAT count
-            elif ser_bytes.decode("utf8")[4:9] == '56 05':
-                #print ('SATs: '+ser_bytes.decode("utf8")[10:11])
-                txData = b't2.txt="'+ser_bytes.decode("utf8")[10:11]+' "'
+            elif x[1] == '56' and x[2] == '05':
+                #print ('SATs: '+x[3])
+                txData = b't2.txt="'+x[3]+' "'
                 uart0.write(txData)
                 uart0.write(end_cmd)
             # Read Maidenhead grid
-            elif ser_bytes.decode("utf8")[4:9] == '72 01':
-                #print ('Grid: '+ser_bytes.decode("utf8")[10:16])
-                txData = b't0.txt="'+ser_bytes.decode("utf8")[10:14]+ser_bytes.decode("utf8")[14:16].lower()+'"'
+            elif x[1] == '72' and x[2] == '01':
+                #print ('Grid: '+x[3])
+                txData = b't0.txt="'+x[3][0:4]+x[3][4:].lower()+'"'
                 uart0.write(txData)
                 uart0.write(end_cmd)
             # Read Latitude
-            elif ser_bytes.decode("utf8")[4:9] == '48 06':
-                #print ('Lat: '+ser_bytes.decode("utf8")[10:20])
-                txData = b't10.txt="'+ser_bytes.decode("utf8")[10:12]+'\u00b0  '+ser_bytes.decode("utf8")[13:18]+' '+ser_bytes.decode("utf8")[18:20]+'"'
+            elif x[1] == '48' and x[2] == '06':
+                #print ('Lat: '+x[3])
+                txData = b't10.txt="'+x[3][0:2]+'\u00b0 '+x[3][3:5]+'.'+x[3][6:8]+' '+x[3][8:9]+'"'
                 uart0.write(txData)
                 uart0.write(end_cmd)
             # Read Longitude
-            elif ser_bytes.decode("utf8")[4:9] == '40 07':
-                #print ('Lon: '+ser_bytes.decode("utf8")[10:20])
-                txData = b't11.txt="'+ser_bytes.decode("utf8")[10:13]+'\u00b0 '+ser_bytes.decode("utf8")[14:19]+' '+ser_bytes.decode("utf8")[19:21]+'"'
+            elif x[1] == '40' and x[2] == '07':
+                #print ('Lon: '+x[3])
+                txData = b't11.txt="'+x[3][0:3]+'\u00b0 '+x[3][4:6]+'.'+x[3][7:9]+' '+x[3][9:10]+'"'
                 uart0.write(txData)
                 uart0.write(end_cmd)
             # Read Downlink IF (40 03 + 64 03)
-            elif ser_bytes.decode("utf8")[4:9] == '40 03':
-                rx_if_1 = ser_bytes.decode("utf8")[10:13]
-            elif ser_bytes.decode("utf8")[4:9] == '64 03':
-                rx_if_2 = ser_bytes.decode("utf8")[11:13]
+            elif x[1] == '40' and x[2] == '03':
+                rx_if_1 = x[3]
+            elif x[1] == '64' and x[2] == '03':
+                rx_if_2 = x[3][1:]
                 print ('RX IF: '+rx_if_1+'.'+rx_if_2+' MHz')
             # Read LNB Reference IF (48 04 + 64 04)
-            elif ser_bytes.decode("utf8")[4:9] == '48 04':
-                lnb_ref_1 = ser_bytes.decode("utf8")[10:12]
-            elif ser_bytes.decode("utf8")[4:9] == '64 04':
-                lnb_ref_2 = ser_bytes.decode("utf8")[11:13]
+            elif x[1] == '48' and x[2] == '04':
+                lnb_ref_1 = x[3]
+            elif x[1] == '64' and x[2] == '04':
+                lnb_ref_2 = x[3][1:]
                 print ('LNB Ref: '+lnb_ref_1+'.'+lnb_ref_2+' MHz')
             # Print unknown sentences
             else:

@@ -1,4 +1,4 @@
-# ConverterDisplay v0.2
+# ConverterDisplay v1.0
 # Florian Wolters, DF2ET
 
 from machine import UART, Pin
@@ -38,6 +38,7 @@ while True:
             print(string)
             print('       012345678901234567890')
             print('                 1         2')
+            print('----------------------------')
         # Read UpConverter Values (first column is always 00 here so ignore x[1])
         if x[0] == 'UPC':
             # Read Temperature (00)
@@ -166,22 +167,22 @@ while True:
             #print("config not yet written")
             if tx_lo != '' and tx_if != '' and rx_if_1 != '' and rx_if_2 != '' and lnb_ref_1 != '' and lnb_ref_2 != '':
             #if rx_if_1 != '' and rx_if_2 !I= '' and lnb_ref_1 != '' and lnb_ref_2 != '':
-                txData = b'config.va0.txt="'+tx_lo+'"'
+                txData = b'config.va0.txt="'+str(tx_lo)+'"'
                 uart0.write(txData)
                 uart0.write(end_cmd)
-                txData = b'config.va1.txt="'+tx_if+'"'
+                txData = b'config.va1.txt="'+str(tx_if)+'"'
                 uart0.write(txData)
                 uart0.write(end_cmd)
-                txData = b'config.va2.txt="'+rx_if_1+'"'
+                txData = b'config.va2.txt="'+str(rx_if_1)+'"'
                 uart0.write(txData)
                 uart0.write(end_cmd)
-                txData = b'config.va3.txt="'+rx_if_2+'"'
+                txData = b'config.va3.txt="'+str(rx_if_2)+'"'
                 uart0.write(txData)
                 uart0.write(end_cmd)
-                txData = b'config.va4.txt="'+lnb_ref_1+'"'
+                txData = b'config.va4.txt="'+str(lnb_ref_1)+'"'
                 uart0.write(txData)
                 uart0.write(end_cmd)
-                txData = b'config.va5.txt="'+lnb_ref_2+'"'
+                txData = b'config.va5.txt="'+str(lnb_ref_2)+'"'
                 uart0.write(txData)
                 uart0.write(end_cmd)
                 txData = b'page 1'
